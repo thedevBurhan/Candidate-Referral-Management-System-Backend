@@ -47,6 +47,8 @@ router.get('/', async (req, res) => {
 
 // Post a new candidate
 router.post('/', upload.single('resume'), async (req, res) => {
+  console.log(req.body); // Log the form data
+  console.log(req.file);
   const { name, email, phone, jobTitle } = req.body;
   const resume = req.file ? req.file.path : null; // Handle file upload
 
