@@ -6,28 +6,28 @@ const path = require('path');
 
 const router = express.Router();
 
-// Ensure uploads directory exists (done only once at the start)
+// Setup file upload destination
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir); // Create directory if it doesn't exist
 }
 
-// Set up multer storage and file filter for PDF files
+// Multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);  // Save to the uploads directory
+    cb(null, uploadDir); // Set upload directory
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);  // Unique filename with timestamp
+    cb(null, Date.now() + '-' + file.originalname); // Add timestamp to filename
   },
 });
 
-// Initialize multer
+// Initialize multer with file size and type limits
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 },  // Max file size of 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype !== 'application/pdf') {
+    if (!file.mimetype.includes('pdf')) {
       return cb(new Error('Only PDF files are allowed.'));
     }
     cb(null, true);
@@ -48,9 +48,9 @@ router.get('/', async (req, res) => {
 // Post a new candidate
 router.post('/', upload.single('resume'), async (req, res) => {
   const { name, email, phone, jobTitle } = req.body;
-  const resume = req.file ? req.file.path : null;
+  const resume = req.file ? req.file.path : null; // Handle file upload
 
-  // Check if any required fields are missing
+  // Validate required fields
   if (!name || !email || !phone || !jobTitle) {
     return res.status(400).json({ message: 'All fields (name, email, phone, jobTitle) are required' });
   }
@@ -61,7 +61,7 @@ router.post('/', upload.single('resume'), async (req, res) => {
     return res.status(400).json({ message: 'Invalid email format' });
   }
 
-  // Validate phone number format
+  // Validate phone number format (10 digits)
   const phoneRegex = /^[0-9]{10}$/;
   if (!phoneRegex.test(phone)) {
     return res.status(400).json({ message: 'Invalid phone number format' });
@@ -74,7 +74,7 @@ router.post('/', upload.single('resume'), async (req, res) => {
       return res.status(400).json({ message: 'Candidate with this email already exists' });
     }
 
-    // Create a new candidate
+    // Create a new candidate document
     const newCandidate = new Candidate({
       name,
       email,
@@ -83,15 +83,15 @@ router.post('/', upload.single('resume'), async (req, res) => {
       resume,
     });
 
+    // Save the new candidate to the database
     await newCandidate.save();
-    res.status(201).json(newCandidate);
+    res.status(201).json(newCandidate); // Respond with the new candidate
 
   } catch (error) {
-    console.error('Error referring candidate:', error.message);
-    res.status(500).json({ message: 'Server error, please try again later', error: error.message });
+    console.error('Error referring candidate:', error); // Log detailed error
+    res.status(500).json({ message: 'Server error, please try again later', error: error.message }); // Send error response
   }
 });
-
 
 // Update candidate status
 router.put('/:id/status', async (req, res) => {
