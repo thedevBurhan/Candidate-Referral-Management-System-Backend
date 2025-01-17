@@ -6,26 +6,25 @@ const path = require('path');
 
 const router = express.Router();
 
-// Setup file upload destination
+
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir); // Create directory if it doesn't exist
+  fs.mkdirSync(uploadDir); 
 }
 
-// Multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // Set upload directory
+    cb(null, uploadDir); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Add timestamp to filename
+    cb(null, Date.now() + '-' + file.originalname); 
   },
 });
 
-// Initialize multer with file size and type limits
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.includes('pdf')) {
       return cb(new Error('Only PDF files are allowed.'));
@@ -47,12 +46,12 @@ router.get('/', async (req, res) => {
 
 // Post a new candidate
 router.post('/', upload.single('resume'), async (req, res) => {
-  console.log(req.body); // Log the form data
+  console.log(req.body);
   console.log(req.file);
   const { name, email, phone, jobTitle } = req.body;
-  const resume = req.file ? req.file.path : null; // Handle file upload
+  const resume = req.file ? req.file.path : null; 
 
-  // Validate required fields
+
   if (!name || !email || !phone || !jobTitle) {
     return res.status(400).json({ message: 'All fields (name, email, phone, jobTitle) are required' });
   }
@@ -85,13 +84,13 @@ router.post('/', upload.single('resume'), async (req, res) => {
       resume,
     });
 
-    // Save the new candidate to the database
+
     await newCandidate.save();
-    res.status(201).json(newCandidate); // Respond with the new candidate
+    res.status(201).json(newCandidate); 
 
   } catch (error) {
-    console.error('Error referring candidate:', error); // Log detailed error
-    res.status(500).json({ message: 'Server error, please try again later', error: error.message }); // Send error response
+    console.error('Error referring candidate:', error);
+    res.status(500).json({ message: 'Server error, please try again later', error: error.message }); 
   }
 });
 
