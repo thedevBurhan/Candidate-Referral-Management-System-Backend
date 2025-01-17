@@ -11,20 +11,20 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// Configure multer for file upload
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // Directory where files will be stored
+    cb(null, uploadDir); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Unique file name
+    cb(null, Date.now() + '-' + file.originalname); 
   },
 });
 
 // Initialize multer
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Set file size limit to 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.includes('pdf')) {
       return cb(new Error('Only PDF files are allowed.'));
@@ -81,10 +81,10 @@ router.post('/', upload.single('resume'), async (req, res) => {
       resume,
     });
 
-    // Save candidate to the database
+  
     await newCandidate.save();
     
-    // Respond with the saved candidate data
+   
     res.status(201).json(newCandidate);
   } catch (error) {
     console.error('Error saving candidate:', error);
@@ -95,7 +95,7 @@ router.post('/', upload.single('resume'), async (req, res) => {
 router.put('/:id/status', async (req, res) => {
   const { status } = req.body;
 
-  // Check if status is valid
+
   const validStatuses = ['Pending', 'Reviewed', 'Hired'];
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ message: 'Invalid status' });
