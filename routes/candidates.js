@@ -23,16 +23,16 @@ const storage = multer.diskStorage({
 });
 
 // Initialize multer with file size and type limits
-const upload = multer({
+const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.includes('pdf')) {
       return cb(new Error('Only PDF files are allowed.'));
     }
     cb(null, true);
   },
-});
+}).single('resume'); 
 
 // Get all candidates
 router.get('/', async (req, res) => {

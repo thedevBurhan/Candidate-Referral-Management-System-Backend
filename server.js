@@ -14,9 +14,10 @@ app.use(express.json());
 // Routes
 app.use('/api/candidates', require('./routes/candidates'));
 app.use((err, req, res, next) => {
-    console.error('Unexpected error:', err);
+    console.error('Unexpected error:', err.stack); 
     res.status(500).json({ message: 'Unexpected server error' });
   });
+  
   
 const PORT = process.env.PORT || 9099;
 
